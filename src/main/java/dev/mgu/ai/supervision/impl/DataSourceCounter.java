@@ -2,6 +2,8 @@ package dev.mgu.ai.supervision.impl;
 
 import dev.mgu.ai.supervision.TokenCounter;
 import dev.mgu.ai.supervision.TokenCounterService;
+import dev.mgu.ai.supervision.properties.ConfigProperties;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -17,6 +19,8 @@ public class DataSourceCounter implements TokenCounterService {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private final JdbcTemplate jdbcTemplate;
+    private final ConfigProperties configProperties;
+
     private final String SQL_SELECT_ALL = """
             SELECT ai_model, prompt_tokens, generation_tokens, total_tokens
             FROM token_table
@@ -38,8 +42,9 @@ public class DataSourceCounter implements TokenCounterService {
             WHERE ai_model = ?
             """;
 
-    public DataSourceCounter(final DataSource dataSource) {
+    public DataSourceCounter(final DataSource dataSource, ConfigProperties configProperties) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.configProperties = configProperties;
     }
 
 
@@ -125,15 +130,18 @@ public class DataSourceCounter implements TokenCounterService {
         }
     }
 
+    @PostConstruct
     public void createSchema() {
 
+        if (!this.configProperties.getSchema().isCreate()) {
+            logger.debug("Skipping creation of token table");
+            return;
+        }
         try {
             loadTable();
             return;
-        } catch (DataAccessException e) {
-            System.err.println(e);
-        }
-        logger.debug("Creating table if not exists");
+        } catch (DataAccessException e) { }
+        logger.debug("Creating table");
         String createSQL = """
                 create table token_table (
                     ai_model VARCHAR(255) NOT NULL UNIQUE,

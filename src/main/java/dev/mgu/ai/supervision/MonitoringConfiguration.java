@@ -1,6 +1,5 @@
 package dev.mgu.ai.supervision;
 
-import dev.mgu.ai.supervision.factory.AiSupervisionConfigurationFinalizer;
 import dev.mgu.ai.supervision.factory.ChatClientAdvisorInjector;
 import dev.mgu.ai.supervision.impl.DataSourceCounter;
 import dev.mgu.ai.supervision.impl.InMemoryCounter;
@@ -27,7 +26,7 @@ import javax.sql.DataSource;
  */
 @Configuration
 @EnableConfigurationProperties(ConfigProperties.class)
-@Import({TokenMonitoringAdvisorHolder.class, TokenCounterController.class, AiSupervisionConfigurationFinalizer.class})
+@Import({TokenMonitoringAdvisorHolder.class, TokenCounterController.class})
 public class MonitoringConfiguration {
     @Bean
     public ChatClientAdvisorInjector chatClientAdvisorInjector(
@@ -38,8 +37,8 @@ public class MonitoringConfiguration {
 
     @Bean
     @ConditionalOnProperty(name = "mgu.ai-supervision.mode", havingValue = "jdbc")
-    public TokenCounterService jdbcCounterService(DataSource dataSource) {
-        return new DataSourceCounter(dataSource);
+    public TokenCounterService jdbcCounterService(DataSource dataSource, ConfigProperties configProperties) {
+        return new DataSourceCounter(dataSource, configProperties);
     }
 
     @Bean
