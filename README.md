@@ -1,14 +1,29 @@
 # Getting Started
 Starting to work with spring-ai and LLM, we quickly have to track our token usage.
-It is easy to integrate spring-ai with prometheus and grafana (see video), but we often do
-not need so much product to do that.
+It is easy to integrate spring-ai with prometheus and grafana (see [video](https://www.youtube.com/watch?v=pBVKkcBhw6I)). 
+Most of the time, we don't need so much product to do that.
 
 This library allows you to monitor your token usage with spring-ai. 
 You have the ability to track your token usage:
- - in-memory: just to let you test it without any further action
- - with jdbc: token usage is stored permanently into a database<br/>Tested with h2, Postgres and MariaDB
+ - **in-memory**: just to let you test it without any further action
+ - with **jdbc**: token usage is stored permanently into a database<br/>Tested with h2, Postgres and MariaDB
 
 This is the first version, So far, only the prompt feature is covered.
+
+## How to do
+Clone this repo.
+
+Build the library mvn clean install
+
+Add the dependency into your spring-ai application.
+```xml
+    <dependency>
+        <groupId>dev.mgu</groupId>
+        <artifactId>spring-boot-starter-ai-supervision</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <scope>compile</scope>
+    </dependency>
+```
 
 ## Configuration
 
@@ -21,7 +36,6 @@ correct database configuration in your application.
 In JDBC you can ask the system to create the table if it does not exists. Set **mgu.ai-supervision.schema.create** 
 to **true** activates the feature. Otherwise you will have the create it manually:
 ```sql
-
   create table if not exists TOKEN_TABLE (
     ai_model VARCHAR(255) NOT NULL UNIQUE,
     prompt_tokens INT,
@@ -31,14 +45,11 @@ to **true** activates the feature. Otherwise you will have the create it manuall
 ```
 
 ## exposed endpoint 
-GET /supervision/tokens
+**GET /supervision/tokens** returns the token counters
 
-Ce endpoint peut être modifié au travers de la variable mgu.ai-supervision.controller
+**DELETE /supervision/tokens** resets all counters.
 
-DELETE /supervision/tokens
-n appel sur le même endpoint avec le 
-verbe DELETE supprime toutes les données.
-
+The value of the exposed endpoint can be customized by the variable **mgu.ai-supervision.controller**
 
 ## TODO
 - See what happens if we create ChatClient beans for multi LLM providers
@@ -47,22 +58,4 @@ verbe DELETE supprime toutes les données.
   it will not work for images because there is a price per image which depends on size and so one
 - Test it with ChatMemory
 - 
-## In-Memory 
-ok, logger à mettre
-
-
-    @Bean
-    public TokenCounterService tokenCounterService() {
-        return new InMemoryCounter();
-    }
-
-## Database
-
-    @Bean
-    public TokenCounterService jdbcCounterService(DataSource dataSource) {
-        return new DataSourceCounter(dataSource);
-    }
-
-Le paramètre mgu.ai-supervision.schema.create avec la valeur true lance un script de création de la table.
-
-Le script a été testé sur des bases h2, Postgres, MariaDB
+iaDB
