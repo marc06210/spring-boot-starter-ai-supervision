@@ -135,7 +135,7 @@ public class DataSourceCounter implements TokenCounterService {
         }
         logger.debug("Creating table if not exists");
         String createSQL = """
-                create table if not exists token_table (
+                create table token_table (
                     ai_model VARCHAR(255) NOT NULL UNIQUE,
                     prompt_tokens INT,
                     generation_tokens INT,
