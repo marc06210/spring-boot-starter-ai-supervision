@@ -51,11 +51,7 @@ to **true** activates the feature. Otherwise you will have the create it manuall
 
 The value of the exposed endpoint can be customized by the variable **mgu.ai-supervision.controller**
 
-## TODO
-- See what happens if we create ChatClient beans for multi LLM providers
-- Test with posgres
-- test with image or make sure to tell 0.0.1-SNAPSHOT is only for prompt
-  it will not work for images because there is a price per image which depends on size and so one
-- Test it with ChatMemory
-- 
-iaDB
+## Additional information
+
+This library works if you inject a ChatClient.Builder bean. It also works when you work with multiple LLM providers
+and manually define your ChatClient beans (see Medium [article](https://medium.com/@marc.guerrini/springboot-ai-two-ai-models-64dbbbe88cb7)).
