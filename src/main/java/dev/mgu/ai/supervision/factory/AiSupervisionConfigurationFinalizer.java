@@ -1,6 +1,7 @@
 package dev.mgu.ai.supervision.factory;
 
 import dev.mgu.ai.supervision.impl.DataSourceCounter;
+import dev.mgu.ai.supervision.properties.ConfigProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -14,9 +15,11 @@ public class AiSupervisionConfigurationFinalizer implements ApplicationListener<
 
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final ApplicationContext context;
+    private final ConfigProperties configProperties;
 
-    public AiSupervisionConfigurationFinalizer(ApplicationContext context) {
+    public AiSupervisionConfigurationFinalizer(ApplicationContext context, ConfigProperties configProperties) {
         this.context = context;
+        this.configProperties = configProperties;
     }
 
     @Override
@@ -29,13 +32,8 @@ public class AiSupervisionConfigurationFinalizer implements ApplicationListener<
     }
 
     private void checkDataSourceConfiguration(DataSourceCounter dataSourceCounterBean) {
-        if (this.context.getEnvironment().containsProperty("mgu.ai-supervision.schema.create")) {
-            String createSchema = this.context.getEnvironment().getProperty("mgu.ai-supervision.schema.create");
-            if ( "true".equals(createSchema)) {
-                dataSourceCounterBean.createSchema();
-            } else {
-                logger.warn("mgu.ai-supervision.schema.create=false");
-            }
+        if (this.configProperties.getSchema().isCreate()) {
+            dataSourceCounterBean.createSchema();
         } else {
             logger.warn("mgu.ai-supervision.schema.create=false");
         }
