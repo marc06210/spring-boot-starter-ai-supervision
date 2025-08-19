@@ -1,21 +1,29 @@
 # Getting Started
-Starting to work with spring-ai and LLM, we quickly have to track our token usage.
-It is easy to integrate spring-ai with prometheus and grafana (see [video](https://www.youtube.com/watch?v=pBVKkcBhw6I)). 
-Most of the time, we don't need so much product to do that.
+When working with **Spring AI** and LLMs, monitoring **token usage** quickly becomes essential.
+While it is possible to integrate Spring AI with Prometheus and Grafana (see this video), such setups can often feel too heavy for simple experiments.
 
-This library allows you to monitor your token usage with spring-ai. 
-You have the ability to track your token usage:
- - **in-memory**: just to let you test it without any further action
- - with **jdbc**: token usage is stored permanently into a database<br/>Tested with h2, Postgres and MariaDB
+This starter library provides a lightweight way to **monitor token usage in Spring AI applications**.
 
-This is the first version, So far, only the prompt feature is covered.
+It supports two modes of operation:
 
-## How to do
-Clone this repo.
+ - **In-memory** → ideal for testing without additional setup
+ - **JDBC** → persists token usage in a relational database (tested with H2, PostgreSQL, and MariaDB)
 
-Build the library mvn clean install
+⚠️ This is the first release. Currently, only the prompt feature is covered.
 
-Add the dependency into your spring-ai application.
+Additionally, an **INFO** log entry is generated after each AI request to provide visibility into request usage.
+
+```shell
+2025-08-19T16:51:44.079+02:00  INFO 72800 --- [spring-ai] [nio-8080-exec-3] d.m.a.s.impl.TokenCountingAdvisor        : Consumed token: TokenCounter[model=gpt-4o-2024-08-06, promptTokens=61, generationTokens=21, totalTokens=82]
+```
+
+## Installation
+Clone this repository and build the library:
+```shell
+mvn clean install
+```
+
+Add the dependency into your Spring AI application.
 ```xml
     <dependency>
         <groupId>dev.mgu</groupId>
@@ -27,31 +35,47 @@ Add the dependency into your spring-ai application.
 
 ## Configuration
 
-The presence of the library into the classpath activates it. By default, you have the in-memory tracking
-system.
+The library is auto-configured when present on the classpath.
+By default, token usage is tracked in memory.
 
-To activate the JDBC tracking, set the parameter **mgu.ai-supervision.mode** to **jdbc**, it implies you have 
-correct database configuration in your application.
+To enable JDBC-based tracking, configure the following property:
 
-In JDBC you can ask the system to create the table if it does not exists. Set **mgu.ai-supervision.schema.create** 
-to **true** activates the feature. Otherwise you will have the create it manually:
+```yaml
+mgu.ai-supervision.mode: jdbc
+```
+This requires a valid database configuration in your application.
+
+### Schema Management
+
+You can choose to let the library create the schema automatically:
+```yaml
+mgu.ai-supervision.schema.create: true
+```
+
+Alternatively, create the table manually:
+
 ```sql
-  create table if not exists TOKEN_TABLE (
+CREATE TABLE IF NOT EXISTS TOKEN_TABLE (
     ai_model VARCHAR(255) NOT NULL UNIQUE,
     prompt_tokens INT,
     generation_tokens INT,
     total_tokens INT
-  );
+);
 ```
 
-## exposed endpoint 
-**GET /supervision/tokens** returns the token counters
+## Endpoints
+The library exposes the following REST endpoints:
 
-**DELETE /supervision/tokens** resets all counters.
+ - GET /supervision/tokens → returns token counters
+ - DELETE /supervision/tokens → resets all counters
 
-The value of the exposed endpoint can be customized by the variable **mgu.ai-supervision.controller**
+The base path can be customized via:
+
+```yaml
+mgu.ai-supervision.controller: /my/custom/path
+```
 
 ## Additional information
 
-This library works if you inject a ChatClient.Builder bean. It also works when you work with multiple LLM providers
-and manually define your ChatClient beans (see Medium [article](https://medium.com/@marc.guerrini/springboot-ai-two-ai-models-64dbbbe88cb7)).
+ - The library works out-of-the-box if you inject a ChatClient.Builder bean.
+ - It is compatible with multiple LLM providers and custom ChatClient beans (see this [Medium article](https://medium.com/@marc.guerrini/springboot-ai-two-ai-models-64dbbbe88cb7)).
