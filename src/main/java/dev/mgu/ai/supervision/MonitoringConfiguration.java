@@ -1,13 +1,14 @@
 package dev.mgu.ai.supervision;
 
-import dev.mgu.ai.supervision.factory.AiSupervisionConfigurationFinalizer;
 import dev.mgu.ai.supervision.factory.ChatClientAdvisorInjector;
 import dev.mgu.ai.supervision.impl.DataSourceCounter;
 import dev.mgu.ai.supervision.impl.InMemoryCounter;
 import dev.mgu.ai.supervision.impl.TokenMonitoringAdvisorHolder;
+import dev.mgu.ai.supervision.properties.ConfigProperties;
 import dev.mgu.ai.supervision.web.TokenCounterController;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -24,7 +25,8 @@ import javax.sql.DataSource;
  * </ul></p>
  */
 @Configuration
-@Import({TokenMonitoringAdvisorHolder.class, TokenCounterController.class, AiSupervisionConfigurationFinalizer.class})
+@EnableConfigurationProperties(ConfigProperties.class)
+@Import({TokenMonitoringAdvisorHolder.class, TokenCounterController.class})
 public class MonitoringConfiguration {
     @Bean
     public ChatClientAdvisorInjector chatClientAdvisorInjector(
@@ -35,8 +37,8 @@ public class MonitoringConfiguration {
 
     @Bean
     @ConditionalOnProperty(name = "mgu.ai-supervision.mode", havingValue = "jdbc")
-    public TokenCounterService jdbcCounterService(DataSource dataSource) {
-        return new DataSourceCounter(dataSource);
+    public TokenCounterService jdbcCounterService(DataSource dataSource, ConfigProperties configProperties) {
+        return new DataSourceCounter(dataSource, configProperties);
     }
 
     @Bean

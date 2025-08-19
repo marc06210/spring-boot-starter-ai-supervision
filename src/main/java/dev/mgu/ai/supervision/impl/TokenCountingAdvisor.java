@@ -42,7 +42,7 @@ public class TokenCountingAdvisor implements CallAdvisor {
                             usage.getPromptTokens(),
                             usage.getCompletionTokens(),
                             usage.getTotalTokens());
-                    logger.debug("Adding counter data: {}", tokenCounter);
+                    logger.info("Consumed token: {}", tokenCounter);
                     tokenCounterService.incrementTokenCounters(tokenCounter);
                 } catch (Exception e) {
                     logger.error("Error while token counting", e);
