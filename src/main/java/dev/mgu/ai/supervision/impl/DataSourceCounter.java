@@ -75,7 +75,7 @@ public class DataSourceCounter implements TokenCounterService {
                 dbData.generationTokens(),
                 dbData.totalTokens(),
                 dbData.model());
-        System.out.println("MGU >>> " + update + " rows updated");
+        logger.debug( update + " rows updated");
     }
 
     private void create(TokenCounter dbData) {
@@ -84,7 +84,7 @@ public class DataSourceCounter implements TokenCounterService {
                 dbData.promptTokens(),
                 dbData.generationTokens(),
                 dbData.totalTokens());
-        System.out.println("MGU >>> " + update + " rows created");
+        logger.debug(update + " rows created");
     }
 
     @Override
